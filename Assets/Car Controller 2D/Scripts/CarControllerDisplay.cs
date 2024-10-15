@@ -7,229 +7,166 @@ public class CarControllerDisplay : MonoBehaviour {
 
     public CarController CarOptions;
 
-    private WheelJoint2D[] Wheels;
-    private WheelJoint2D FrontWheel;
-    private WheelJoint2D RearWheel;
-    public JointMotor2D motorFront;
-    public JointMotor2D motorRear;
+    private WheelJoint2D[] wheels;
+    private WheelJoint2D frontWheel;
+    private WheelJoint2D rearWheel;
+    private JointMotor2D motorFront;
+    private JointMotor2D motorRear;
 
-    private Text SpeedText;
-    private Text GearText;
+    private Text speedText;
+    private Text gearText;
 
     private float carSpeed;
-    private float carMotorforce;
+    private float carMotorForce;
+    private float currentSpeed = 0f;
+    private float targetSpeed = 0f;
+    private float acceleration = 5f;  // Hızlanma katsayısı
+    private float deceleration = 5f;  // Yavaşlama katsayısı
     private float mySpeed;
-    private float myMotorforce;
-    private float myMassFrontWheel;
-    private float myMassRearWheel;
-    private string mySpeedString;
-    private string myGearString;
+    private float myMotorForce;
+    private bool isSlowingDown = false;
 
     void Start()
     {
         CarOptions.currentTransmission = 0;
-        Wheels = GetComponents<WheelJoint2D>();
-        for(int i=0; i < Wheels.Length; i++)
+        wheels = GetComponents<WheelJoint2D>();
+        if (wheels.Length >= 2)
         {
-            FrontWheel = Wheels[0];
-            RearWheel = Wheels[1];
+            frontWheel = wheels[0];
+            rearWheel = wheels[1];
         }
         GetComponent<Rigidbody2D>().mass = CarOptions.CarMass / 10f;
-        FrontWheel.connectedBody.mass = CarOptions.FrontWheelMass;
-        RearWheel.connectedBody.mass = CarOptions.RearWheelMass;
-        mySpeedString = CarOptions.SpeedTextName;
-        myGearString = CarOptions.GearTextName;
+        frontWheel.connectedBody.mass = CarOptions.FrontWheelMass;
+        rearWheel.connectedBody.mass = CarOptions.RearWheelMass;
+
+        speedText = GameObject.Find(CarOptions.SpeedTextName)?.GetComponent<Text>();
+        gearText = GameObject.Find(CarOptions.GearTextName)?.GetComponent<Text>();
     }
 
-    void FixedUpdate () {
-        HUD();
-        TransmissionsStart();
-        Movement();
-    }
-
-    void Update()
+    void FixedUpdate()
     {
-        if(CarOptions == null)
+        if (CarOptions == null)
         {
             Debug.LogWarning("Assets -> Create -> Car Controller -> Create Car Controller");
+            return;
         }
-        if (CarOptions.currentTransmission >= CarOptions.Transmission.Length)
-        {
-            CarOptions.currentTransmission = CarOptions.Transmission.Length;
-        }
+
+        HUD();
+        HandleTransmissions();
+        HandleMovement();
     }
 
     void HUD()
     {
-        float mySpeedCar = gameObject.GetComponent<Rigidbody2D>().velocity.magnitude * 3.6f;
-        float SpeedCar = Mathf.Round(mySpeedCar);
-        int myGear = CarOptions.currentTransmission;
-        GearText = GameObject.Find(myGearString).GetComponent<Text>();
-        if(GearText != null)
+        float mySpeedCar = GetComponent<Rigidbody2D>().velocity.magnitude * 3.6f;
+        float speedCar = Mathf.Round(mySpeedCar);
+
+        if (gearText != null)
         {
-            GearText.text = "Gear: " + myGear.ToString();
+            gearText.text = "Gear: " + CarOptions.currentTransmission.ToString();
         }
-        SpeedText = GameObject.Find(mySpeedString).GetComponent<Text>();
-        if (SpeedText != null)
+        if (speedText != null)
         {
-            SpeedText.text = "Speed: " + SpeedCar.ToString();
+            speedText.text = "Speed: " + speedCar.ToString();
         }
     }
 
-    void TransmissionsStart()
+    void HandleTransmissions()
     {
-        for (int i = CarOptions.currentTransmission; i < CarOptions.Transmission.Length; i++)
+        int currentTransmission = CarOptions.currentTransmission;
+
+        for (int i = 0; i < CarOptions.Transmission.Length; i++)
         {
-            CarOptions.Transmission[i] = false;
+            CarOptions.Transmission[i] = i == currentTransmission;
         }
 
-        if (CarOptions.currentTransmission <= 0)
+        if (currentTransmission == 0)
         {
-            CarOptions.Transmission[0] = false;
-            CarOptions.Transmission[1] = false;
-            CarOptions.Transmission[2] = false;
-            CarOptions.Transmission[3] = false;
-            CarOptions.Transmission[4] = false;
-            CarOptions.Transmission[5] = false;
-            CarOptions.Transmission[6] = false;
-            CarOptions.currentTransmission = 0;
             mySpeed = 0;
-            myMotorforce = 0;
+            myMotorForce = 0;
         }
-        if (CarOptions.currentTransmission == 1)
+        else if (currentTransmission > 0 && currentTransmission <= CarOptions.gearRatio.Length)
         {
-            CarOptions.Transmission[0] = true;
-        }
-        if (CarOptions.currentTransmission == 2)
-        {
-            CarOptions.Transmission[1] = true;
-        }
-        if (CarOptions.currentTransmission == 3)
-        {
-            CarOptions.Transmission[2] = true;
-        }
-        if (CarOptions.currentTransmission == 4)
-        {
-            CarOptions.Transmission[3] = true;
-        }
-        if (CarOptions.currentTransmission == 5)
-        {
-            CarOptions.Transmission[4] = true;
-        }
-        if (CarOptions.currentTransmission == 6)
-        {
-            CarOptions.Transmission[5] = true;
-        }
-        if (CarOptions.currentTransmission == 7)
-        {
-            CarOptions.Transmission[6] = true;
+            mySpeed = carSpeed / CarOptions.gearRatio[currentTransmission - 1];
+            myMotorForce = carMotorForce * CarOptions.gearRatio[currentTransmission - 1];
         }
     }
 
-    void Movement()
+    void HandleMovement()
     {
-        if (CarOptions.FWD == false && CarOptions.RWD == false)
+        if (!CarOptions.FWD && !CarOptions.RWD)
         {
-            CarOptions.RWD = true;
             CarOptions.FWD = true;
+            CarOptions.RWD = true;
         }
 
         carSpeed = CarOptions.MaxSpeed * 11.53846153846154f;
-        carMotorforce = CarOptions.motorForce;
+        carMotorForce = CarOptions.motorForce;
 
-        
-        if (CarOptions.Transmission[0] == true)
+        if (Input.GetKeyDown(KeyCode.A) && CarOptions.currentTransmission < CarOptions.gearRatio.Length)
         {
-            mySpeed = carSpeed / CarOptions.gearRatio[0];
-            myMotorforce = carMotorforce * CarOptions.gearRatio[0];
-        }
-
-        if (CarOptions.Transmission[1] == true)
-        {
-            mySpeed = carSpeed / CarOptions.gearRatio[1];
-            myMotorforce = carMotorforce * CarOptions.gearRatio[1];
-            CarOptions.Transmission[0] = false;
-        }
-
-        if (CarOptions.Transmission[2] == true)
-        {
-            CarOptions.Transmission[0] = false;
-            CarOptions.Transmission[1] = false;
-            mySpeed = carSpeed / CarOptions.gearRatio[2];
-            myMotorforce = carMotorforce * CarOptions.gearRatio[2];
-        }
-        if (CarOptions.Transmission[3] == true)
-        {
-            CarOptions.Transmission[0] = false;
-            CarOptions.Transmission[1] = false;
-            CarOptions.Transmission[2] = false;
-            mySpeed = carSpeed / CarOptions.gearRatio[3];
-            myMotorforce = carMotorforce * CarOptions.gearRatio[3];
-        }
-        if (CarOptions.Transmission[4] == true)
-        {
-            CarOptions.Transmission[0] = false;
-            CarOptions.Transmission[1] = false;
-            CarOptions.Transmission[2] = false;
-            CarOptions.Transmission[3] = false;
-            mySpeed = carSpeed / CarOptions.gearRatio[4];
-            myMotorforce = carMotorforce * CarOptions.gearRatio[4];
-        }
-        if (CarOptions.Transmission[5] == true)
-        {
-            CarOptions.Transmission[0] = false;
-            CarOptions.Transmission[1] = false;
-            CarOptions.Transmission[2] = false;
-            CarOptions.Transmission[3] = false;
-            CarOptions.Transmission[4] = false;
-            mySpeed = carSpeed / CarOptions.gearRatio[5];
-            myMotorforce = carMotorforce * CarOptions.gearRatio[5];
-        }
-        if (CarOptions.Transmission[6] == true)
-        {
-            CarOptions.Transmission[0] = false;
-            CarOptions.Transmission[1] = false;
-            CarOptions.Transmission[2] = false;
-            CarOptions.Transmission[3] = false;
-            CarOptions.Transmission[4] = false;
-            CarOptions.Transmission[5] = false;
-            mySpeed = carSpeed / CarOptions.gearRatio[6];
-            myMotorforce = carMotorforce * CarOptions.gearRatio[6];
-        }
-        if (Input.GetKeyDown(KeyCode.A))
-        {
-            CarOptions.currentTransmission++;  
+            CarOptions.currentTransmission++;
         }
         if (Input.GetKeyDown(KeyCode.Z) && CarOptions.currentTransmission > 0)
         {
-           CarOptions.currentTransmission--;
+            CarOptions.currentTransmission--;
         }
 
-            if (Input.GetAxisRaw("Vertical") > 0)
-        {
-            motorFront.motorSpeed = -mySpeed;
-            if (CarOptions.FWD == true)
-            {
-                motorFront.maxMotorTorque = myMotorforce;
-            }
-            FrontWheel.motor = motorFront;
+        float verticalInput = Input.GetAxisRaw("Vertical");
 
-            motorRear.motorSpeed = -mySpeed;
-            if (CarOptions.RWD == true)
-            {
-                motorRear.maxMotorTorque = myMotorforce;
-            }
-            RearWheel.motor = motorRear;
+        if (verticalInput > 0)
+        {
+            targetSpeed = mySpeed;
+        }
+        else if (verticalInput < 0)
+        {
+            targetSpeed = -mySpeed;
         }
         else
         {
-            motorFront.motorSpeed = 0;
-            motorFront.maxMotorTorque = 0;
-            FrontWheel.motor = motorFront;
-
-            motorRear.motorSpeed = 0;
-            motorRear.maxMotorTorque = 0;
-            RearWheel.motor = motorRear;
+            targetSpeed = 0;
         }
+
+        // Hızlanma ve yavaşlama
+        if (isSlowingDown)
+        {
+            currentSpeed = Mathf.Lerp(currentSpeed, 0, deceleration * Time.fixedDeltaTime);
+            if (currentSpeed < 0.1f)
+            {
+                currentSpeed = 0;
+                isSlowingDown = false;
+            }
+        }
+        else
+        {
+            if (currentSpeed < targetSpeed)
+            {
+                currentSpeed = Mathf.Min(currentSpeed + acceleration * Time.fixedDeltaTime, targetSpeed);
+            }
+            else if (currentSpeed > targetSpeed)
+            {
+                currentSpeed = Mathf.Max(currentSpeed - deceleration * Time.fixedDeltaTime, targetSpeed);
+            }
+        }
+
+        motorFront.motorSpeed = -currentSpeed;
+        motorRear.motorSpeed = -currentSpeed;
+
+        if (CarOptions.FWD)
+        {
+            motorFront.maxMotorTorque = verticalInput > 0 ? myMotorForce : 0;
+        }
+        if (CarOptions.RWD)
+        {
+            motorRear.maxMotorTorque = verticalInput > 0 ? myMotorForce : 0;
+        }
+
+        frontWheel.motor = motorFront;
+        rearWheel.motor = motorRear;
+    }
+
+    public void ReduceSpeed()
+    {
+        isSlowingDown = true;
     }
 }

@@ -9,6 +9,8 @@ TagManager:
   - Boost
   - cakil
   - cim
+  - Car
+  - road
   layers:
   - Default
   - TransparentFX
