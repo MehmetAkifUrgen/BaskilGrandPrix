@@ -13,7 +13,6 @@ GameObject:
   - component: {fileID: 5356057652711554587}
   - component: {fileID: 5356057652711554588}
   - component: {fileID: 5356057652711554590}
-  - component: {fileID: 5356057652711554577}
   - component: {fileID: 1381557707458142547}
   - component: {fileID: -1985714590049636344}
   m_Layer: 0
@@ -154,25 +153,6 @@ BoxCollider2D:
   serializedVersion: 2
   m_Size: {x: 1.5266922, y: 3.400777}
   m_EdgeRadius: 0
---- !u!114 &5356057652711554577
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 5356057652711554584}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 5f706458fd72598428fbca2101ea55de, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  hasPackageColor:
-    serializedVersion: 2
-    rgba: 4280024832
-  noPackageColor:
-    serializedVersion: 2
-    rgba: 4294967295
-  destroyDelay: 0.5
 --- !u!114 &1381557707458142547
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -210,8 +190,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   m_PositionModel:
     SynchronizeEnabled: 1
-    TeleportEnabled: 1
-    TeleportIfDistanceGreaterThan: 3
+    TeleportEnabled: 0
+    TeleportIfDistanceGreaterThan: 500000000
     InterpolateOption: 2
     InterpolateMoveTowardsSpeed: 1
     InterpolateLerpSpeed: 1

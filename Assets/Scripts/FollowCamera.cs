@@ -1,29 +1,30 @@
 using System.Collections;
 using System.Collections.Generic;
-using Photon.Pun;
 using UnityEngine;
+using Photon.Pun;
 
 public class FollowCamera : MonoBehaviour
-{
-    [SerializeField] private SpawnPlayers spawnPlayers; // SpawnPlayers referansı
-    [SerializeField] private Vector3 offset = new Vector3(0, 5, -10);
-    [SerializeField] private float followSpeed = 0.125f;
-    private GameObject thingToFollow; // Takip edilecek nesne
+{ 
+    
+    public Transform target;
 
     void Start()
     {
-        // Oyun başladığında, SpawnPlayers'dan arabayı al
-        thingToFollow = spawnPlayers.GetSpawnedCar();
+        // PhotonView kullanarak yalnızca kendi arabasını takip et
+        if (PhotonNetwork.LocalPlayer.TagObject != null)
+        {
+            target = ((GameObject)PhotonNetwork.LocalPlayer.TagObject).transform;
+        }
     }
 
     void LateUpdate()
     {
-        if (thingToFollow == null) return; // Eğer araba bulunmazsa kamerayı hareket ettirme
-
-        Vector3 desiredPosition = thingToFollow.transform.position + thingToFollow.transform.TransformDirection(offset);
-        Vector3 smoothedPosition = Vector3.Lerp(transform.position, desiredPosition, followSpeed);
-        transform.position = smoothedPosition;
-
-        transform.rotation = Quaternion.Lerp(transform.rotation, thingToFollow.transform.rotation, followSpeed);
+        if (target != null)
+        {
+            // Kameranın konumunu arabaya ayarla
+            Vector3 newPosition = target.position;
+            newPosition.z = transform.position.z; // Z eksenini sabit tut
+            transform.position = newPosition;
+        }
     }
 }

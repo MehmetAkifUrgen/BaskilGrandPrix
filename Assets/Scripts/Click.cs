@@ -9,4 +9,8 @@ public class Click : MonoBehaviour
         SceneManager.LoadScene("Loading"); // "Game" sahnesine geçiş yaparak oyunu başlatın
     }
 
+    public void SinglePlayer(){
+        SceneManager.LoadScene("SinglePlayerGame");
+    }
+
 }

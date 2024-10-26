@@ -33,36 +33,30 @@ public class Driver : MonoBehaviour
         view=GetComponent<PhotonView>();
     }
 
-    void FixedUpdate()
-    {
-       if(view.IsMine){
-         // Arabayı ileri veya geri hareket ettir
-        float input = gas.ReadValue<float>() - brake.ReadValue<float>();
-        float horizontal = Input.acceleration.x;
-        horizontal = Mathf.Clamp(horizontal, -1f, 1f); // Input değerini -1 ile 1 arasında normalleştirin
-        float angle = horizontal * steerSpeed;
-        transform.Rotate(0, 0, -angle);
-        float accelerationAmount = input * acceleration * Time.deltaTime;
+   void FixedUpdate()
+{
+   if(view.IsMine){
+     float input = gas.ReadValue<float>() - brake.ReadValue<float>();
+     float horizontal = Input.acceleration.x;
+     horizontal = Mathf.Clamp(horizontal, -1f, 1f); // Input değerini -1 ile 1 arasında normalleştir
+     float angle = horizontal * steerSpeed;
+     transform.Rotate(0, 0, -angle);
+     float accelerationAmount = input * acceleration * Time.deltaTime;
 
-        if (input > 0)
-        {
-            currentSpeed = Mathf.Clamp(currentSpeed + acceleration * Time.deltaTime, 0f, maxSpeed);
-        }
-        /*   else if (input < 0)
-           {
-               // Arabayı geriye hareket ettir
-               currentSpeed = Mathf.Clamp(currentSpeed - reverseSpeed * Time.deltaTime, -maxSpeed, 0f);
-           }*/
-        else
-        {
-            // Gaz pedalından ayağını çektiğinde veya fren yaparken arabanın hızını azalt
-            currentSpeed = Mathf.MoveTowards(currentSpeed, 0f, deceleration * Time.deltaTime);
-        }
+     if (input > 0)
+     {
+         // Hız sınırlaması olmadan hızlan
+         currentSpeed += acceleration * Time.deltaTime;
+     }
+     else
+     {
+         // Fren yapmadığında ya da gaz pedalından ayağını çektiğinde hızı azalt
+         currentSpeed = Mathf.MoveTowards(currentSpeed, 0f, deceleration * Time.deltaTime);
+     }
 
-        rb.velocity = transform.up * currentSpeed;
-       }
-
-    }
+     rb.velocity = transform.up * currentSpeed;
+   }
+}
 
     void OnTriggerStay2D(Collider2D other)
     {

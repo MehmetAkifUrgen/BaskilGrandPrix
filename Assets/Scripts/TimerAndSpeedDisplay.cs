@@ -34,12 +34,27 @@ public class TimerAndSpeedDisplay : MonoBehaviour
         timerText.text = minutes + ":" + seconds;
     }
 
-    private void UpdateSpeed()
+   private void UpdateSpeed()
+{
+    if (car != null) // Car referansını kontrol edin
     {
         Rigidbody2D carRigidbody = car.GetComponent<Rigidbody2D>();
-        float speed = carRigidbody.velocity.magnitude * 3.6f;  // m/s to km/h
-        speedText.text = "Speed: " + speed.ToString("f2") + " km/h";
+        if (carRigidbody != null) // Rigidbody2D var mı kontrol edin
+        {
+            float speed = carRigidbody.velocity.magnitude * 3.6f;  // m/s to km/h
+            speedText.text = "Speed: " + speed.ToString("f2") + " km/h";
+        }
+        else
+        {
+            speedText.text = "Rigidbody2D not found!";
+        }
     }
+    else
+    {
+        speedText.text = "Car reference is null!";
+    }
+}
+
 
     public void StopTimer()
     {
