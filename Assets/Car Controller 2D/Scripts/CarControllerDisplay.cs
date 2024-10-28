@@ -58,7 +58,7 @@ public class CarControllerDisplay : MonoBehaviour {
 
     void HUD()
     {
-        float mySpeedCar = GetComponent<Rigidbody2D>().velocity.magnitude * 3.6f;
+        float mySpeedCar = GetComponent<Rigidbody2D>().linearVelocity.magnitude * 3.6f;
         float speedCar = Mathf.Round(mySpeedCar);
 
         if (gearText != null)

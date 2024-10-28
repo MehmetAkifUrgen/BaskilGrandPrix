@@ -53,3 +53,10 @@ TextureImporter:
   userData: 
   assetBundleName: 
   assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 18207
+  packageName: 2D Race Cars
+  packageVersion: 1.02
+  assetPath: Assets/race_cars_2d/misc/asphalt_1.png
+  uploadId: 160181

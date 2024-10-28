@@ -47,7 +47,7 @@ public class BotController : MonoBehaviour
         currentSpeed = Mathf.Clamp(currentSpeed + acceleration * Time.deltaTime, 0f, maxSpeed);
 
         // Hareket et
-        rb.velocity = transform.up * currentSpeed;
+        rb.linearVelocity = transform.up * currentSpeed;
 
         // Eğer waypoint'e yakınsa bir sonraki waypoint'e geç
         if (Vector2.Distance(transform.position, targetWaypoint.position) < 0.2f)

@@ -54,7 +54,7 @@ public class Driver : MonoBehaviour
          currentSpeed = Mathf.MoveTowards(currentSpeed, 0f, deceleration * Time.deltaTime);
      }
 
-     rb.velocity = transform.up * currentSpeed;
+     rb.linearVelocity = transform.up * currentSpeed;
    }
 }
 
