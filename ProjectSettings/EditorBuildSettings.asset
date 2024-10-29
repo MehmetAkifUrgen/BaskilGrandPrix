@@ -26,5 +26,9 @@ EditorBuildSettings:
   - enabled: 1
     path: Assets/Scenes/bubir.unity
     guid: 4435405fe72ed994d99c45031c453695
+  - enabled: 1
+    path: Assets/Scenes/SinglePlayerGame.unity
+    guid: cb4a8cca7e195234387f00eb8ca441a5
   m_configObjects:
     com.unity.input.settings: {fileID: 11400000, guid: c9974c52388c4374a937919dab18aea9, type: 2}
+  m_UseUCBPForAssetBundles: 0
