@@ -3,6 +3,7 @@ using UnityEngine.UI;
 using UnityEngine.SceneManagement;
 using Photon.Pun;
 
+
 public class CarSelection : MonoBehaviour
 {
     public Sprite[] carSprites;    // Tüm araba sprite'ları (7 adet)
@@ -20,5 +21,10 @@ public class CarSelection : MonoBehaviour
         PhotonNetwork.LocalPlayer.SetCustomProperties(playerProperties);
         // Waiting Room sahnesine geçiş yap
         SceneManager.LoadScene("WaitingRoom");
+    }
+
+    public void OnBackButtonPressed()
+    {
+        SceneManager.LoadScene("PreviousSceneName"); // Burada önceki sahne adını girin
     }
 }

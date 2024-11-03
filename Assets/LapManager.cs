@@ -1,7 +1,7 @@
 using UnityEngine;
 using Photon.Pun;
 using System.Collections.Generic;
-using UnityEngine.UI;  // UI bileşenleri için ekleyin
+using UnityEngine.UI;
 
 public class LapManager : MonoBehaviour
 {
@@ -25,37 +25,47 @@ public class LapManager : MonoBehaviour
     }
 
     private void OnTriggerEnter(Collider other)
+{
+    // Oyuncu bitiş çizgisine ulaştığında
+    if (other.CompareTag("Car"))
     {
-        // Oyuncu bitiş çizgisine ulaştığında
-        if (other.CompareTag("Car"))
+        PhotonView photonView = other.GetComponent<PhotonView>();
+        if (photonView != null)
         {
-            Photon.Realtime.Player player = other.GetComponent<PhotonView>().Owner;
+            Photon.Realtime.Player player = photonView.Owner;
 
             // Oyuncunun tur sayısını artır
-            playerLaps[player]++;
-
-            // UI Text ile ekranda tur bilgisini güncelle
-            UpdateLapUI();
-
-            if (playerLaps[player] >= totalLaps)
+            if (playerLaps[player] < totalLaps)
             {
-                if (!finishOrder.Contains(player)) // Eğer oyuncu daha önce bitirmediyse
+                playerLaps[player]++;
+                UpdateLapUI();
+
+                if (playerLaps[player] >= totalLaps)
                 {
-                    finishOrder.Add(player);  // Oyuncuyu bitirenler listesine ekle
-                    finishedPlayers++;
-
-                    // Oyuncuya sırasını göster
-                    other.GetComponent<PlayerController>().ShowFinishPosition(finishedPlayers);
-
-                    // Tüm oyuncular bitirdiyse oyunu sonlandır
-                    if (finishedPlayers == PhotonNetwork.PlayerList.Length)
+                    if (!finishOrder.Contains(player)) // Eğer oyuncu daha önce bitirmediyse
                     {
-                        EndRace();
+                        finishOrder.Add(player);  // Oyuncuyu bitirenler listesine ekle
+                        finishedPlayers++;
+
+                        // Oyuncuya sırasını göster
+                        other.GetComponent<PlayerController>().ShowFinishPosition(finishedPlayers);
+
+                        // Tüm oyuncular bitirdiyse oyunu sonlandır
+                        if (finishedPlayers == PhotonNetwork.PlayerList.Length)
+                        {
+                            EndRace();
+                        }
                     }
                 }
             }
         }
+        else
+        {
+            Debug.LogWarning("No PhotonView found on the car!");
+        }
     }
+}
+
 
     // UI'daki tur bilgisini güncelleyen fonksiyon
     private void UpdateLapUI()

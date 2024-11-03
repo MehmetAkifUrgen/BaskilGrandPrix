@@ -4,6 +4,7 @@ using Photon.Pun;
 using Photon.Realtime;
 using UnityEngine;
 using UnityEngine.UI;
+using UnityEngine.SceneManagement;
 
 public class CreateAndJoinRooms : MonoBehaviourPunCallbacks
 {
@@ -27,6 +28,11 @@ public void CreateRoom()
     public override void OnJoinedRoom()
     {
        PhotonNetwork.LoadLevel("SelectCar");
+    }
+
+    public void OnBackButtonPressed()
+    {
+        SceneManager.LoadScene("start"); // Burada önceki sahne adını girin
     }
 
 }

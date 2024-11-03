@@ -180,7 +180,7 @@ SpriteRenderer:
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: 0
-  m_Sprite: {fileID: 21300000, guid: 2576efa58b7d34e458c0eecc57096b87, type: 3}
+  m_Sprite: {fileID: -5608819318807225731, guid: 42ec9e707e7e21c42a5d004c0a1a72cc, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
   m_FlipY: 0
@@ -200,8 +200,8 @@ Transform:
   m_GameObject: {fileID: 382255498}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -0.1239, y: -0.0889, z: 0}
-  m_LocalScale: {x: 2.3942757, y: 1.1595607, z: 1}
+  m_LocalPosition: {x: -0.1468, y: -0.0889, z: 0}
+  m_LocalScale: {x: 1.390305, y: 1.1595607, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}
@@ -705,7 +705,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: Baskil Grand Prix
+  m_text: Viilage Races
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 2e498d1c8094910479dc3e1b768306a4, type: 2}
   m_sharedMaterial: {fileID: 2180264, guid: 2e498d1c8094910479dc3e1b768306a4, type: 2}

@@ -22,14 +22,12 @@ public class InAppUpdate : MonoBehaviour
         {
             var appUpdateInfoResult = appUpdateInfoOperation.GetResult();
 
-            // Güncelleme durumu kontrolü
-            // Burada AppUpdateOptions oluşturmanız gerekiyor
-            var appUpdateOptions = AppUpdateOptions.ImmediateAppUpdateOptions();
+            // Güncelleme seçeneklerini belirliyoruz (zorunlu veya esnek ayrımı yapılmadan her durumda güncelleme yapılacak)
+            var appUpdateOptions = AppUpdateOptions.ImmediateAppUpdateOptions(); // Hangi güncelleme türü olduğuna bakılmaksızın her zaman Immediate kullanılıyor.
 
-            if (appUpdateInfoResult.UpdateAvailability == UpdateAvailability.UpdateAvailable &&
-                appUpdateInfoResult.IsUpdateTypeAllowed(appUpdateOptions)) // Zorunlu güncelleme kontrolü
+            // Güncelleme mevcutsa güncellemeyi başlat
+            if (appUpdateInfoResult.UpdateAvailability == UpdateAvailability.UpdateAvailable)
             {
-                // Zorunlu güncelleme başlatılıyor
                 StartCoroutine(StartImmediateUpdate(appUpdateInfoResult));
             }
             else
