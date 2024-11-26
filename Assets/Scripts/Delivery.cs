@@ -5,74 +5,86 @@ using UnityEngine.InputSystem;
 
 public class Delivery : MonoBehaviour
 {
-  
-    public float speed = 15f;
-    public float maxSpeed = 60f;
-    public float acceleration = 10f;
-    public float deceleration = 0.0002f;
-    public float reverseSpeed = 0.0002f; // Geri hareket hızı
+    public float maxSpeed = 60f;          // Normal yoldaki maksimum hız
+    public float gravelMaxSpeed = 15f;    // Çakıldaki maksimum hız (daha düşük)
+    public float acceleration = 10f;      // Normal yolda hızlanma
+    public float gravelAcceleration = 5f; // Çakıldaki hızlanma (daha düşük)
+    public float deceleration = 5f;       // Normal yolda yavaşlama
+    public float gravelDeceleration = 10f; // Çakıldaki yavaşlama (daha hızlı)
 
     private Rigidbody2D rb;
     private float currentSpeed = 0f;
-    private float steerSpeed = 5f;
+    private bool isOnGravel = false;
+
     private InputAction gas;
     private InputAction brake;
-    private InputAction steering;
 
-
+    private SimpleInputNamespace.SteeringWheel steeringWheel;
 
     void Start()
     {
         rb = GetComponent<Rigidbody2D>();
         gas = new InputAction("Vertical", InputActionType.Value, "<Gamepad>/rightTrigger");
         brake = new InputAction("Geri", InputActionType.Value, "<Gamepad>/leftTrigger");
-        steering = new InputAction("Horizontal", InputActionType.Value, "<Gamepad>/leftStick/x");
         gas.Enable();
         brake.Enable();
-        steering.Enable();
-     
+
+        // SteeringWheel bileşenini bul ve atama yap
+        steeringWheel = FindObjectOfType<SimpleInputNamespace.SteeringWheel>();
+        if (steeringWheel == null)
+        {
+            Debug.LogError("SteeringWheel bileşeni sahnede bulunamadı!");
+        }
     }
 
     void FixedUpdate()
     {
- 
-         // Arabayı ileri veya geri hareket ettir
+        // Gaz ve fren girişlerini oku
         float input = gas.ReadValue<float>() - brake.ReadValue<float>();
-        float horizontal = Input.acceleration.x;
-        horizontal = Mathf.Clamp(horizontal, -1f, 1f); // Input değerini -1 ile 1 arasında normalleştirin
-        float angle = horizontal * steerSpeed;
-        transform.Rotate(0, 0, -angle);
-        float accelerationAmount = input * acceleration * Time.deltaTime;
 
+        // Hızlanma ve yavaşlama değerlerini zemin durumuna göre ayarla
+        float targetMaxSpeed = isOnGravel ? gravelMaxSpeed : maxSpeed;
+        float currentAcceleration = isOnGravel ? gravelAcceleration : acceleration;
+        float currentDeceleration = isOnGravel ? gravelDeceleration : deceleration;
+
+        // Gaz verildiğinde hızlanma
         if (input > 0)
         {
-            currentSpeed = Mathf.Clamp(currentSpeed + acceleration * Time.deltaTime, 0f, maxSpeed);
+            currentSpeed = Mathf.Clamp(currentSpeed + currentAcceleration * Time.deltaTime, 0f, targetMaxSpeed);
         }
-        /*   else if (input < 0)
-           {
-               // Arabayı geriye hareket ettir
-               currentSpeed = Mathf.Clamp(currentSpeed - reverseSpeed * Time.deltaTime, -maxSpeed, 0f);
-           }*/
         else
         {
-            // Gaz pedalından ayağını çektiğinde veya fren yaparken arabanın hızını azalt
-            currentSpeed = Mathf.MoveTowards(currentSpeed, 0f, deceleration * Time.deltaTime);
+            // Gazdan çekildiğinde yavaşlama
+            currentSpeed = Mathf.MoveTowards(currentSpeed, 0f, currentDeceleration * Time.deltaTime);
         }
 
-        rb.linearVelocity = transform.up * currentSpeed;
-       
+        // Direksiyon değerini `SteeringWheel`'den al
+        float horizontal = steeringWheel != null ? steeringWheel.Value : 0f;
+        float steerSpeed = Mathf.Lerp(1f, 0.5f, currentSpeed / targetMaxSpeed); // Hız arttıkça daha az dönüş
+        float angle = horizontal * steerSpeed;
 
+        // Arabayı döndür
+        transform.Rotate(0, 0, -angle);
+
+        // Hızı arabaya uygula
+        rb.linearVelocity = transform.up * currentSpeed;
     }
 
-    void OnTriggerStay2D(Collider2D other)
+    void OnTriggerEnter2D(Collider2D other)
     {
-        // Eğer araba Square colliderı üzerinden geçerse, hızını yavaşlat
+        // Çakıla girildiğinde isOnGravel durumunu ayarla
         if (other.CompareTag("cakil"))
         {
-            currentSpeed = 5f;
-            maxSpeed = 20f;
+            isOnGravel = true;
         }
     }
 
-
+    void OnTriggerExit2D(Collider2D other)
+    {
+        // Çakıdan çıkıldığında isOnGravel durumunu sıfırla
+        if (other.CompareTag("cakil"))
+        {
+            isOnGravel = false;
+        }
+    }
 }

@@ -25,6 +25,6 @@ public class CarSelection : MonoBehaviour
 
     public void OnBackButtonPressed()
     {
-        SceneManager.LoadScene("PreviousSceneName"); // Burada önceki sahne adını girin
+        SceneManager.LoadScene("Lobby"); // Burada önceki sahne adını girin
     }
 }

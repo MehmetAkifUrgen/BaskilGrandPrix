@@ -58,4 +58,39 @@ public class InAppUpdate : MonoBehaviour
             appUpdateManager.CompleteUpdate();
         }
     }
+    IEnumerator StartFlexibleUpdate()
+    {
+        var appUpdateInfoOperation = appUpdateManager.GetAppUpdateInfo();
+        var appUpdateInfoResult = appUpdateInfoOperation.GetResult();
+        // Creates an AppUpdateOptions defining a flexible in-app
+        // update flow and its parameters.
+        var appUpdateOptions = AppUpdateOptions.FlexibleAppUpdateOptions();
+        // Creates an AppUpdateRequest that can be used to monitor the
+        // requested in-app update flow.
+        var startUpdateRequest = appUpdateManager.StartUpdate(
+          // The result returned by PlayAsyncOperation.GetResult().
+          appUpdateInfoResult,
+          // The AppUpdateOptions created defining the requested in-app update
+          // and its parameters.
+          appUpdateOptions);
+
+        while (!startUpdateRequest.IsDone)
+        {
+            // For flexible flow,the user can continue to use the app while
+            // the update downloads in the background. You can implement a
+            // progress bar showing the download status during this time.
+            yield return null;
+        }
+
+    }
+
+    IEnumerator CompleteFlexibleUpdate()
+    {
+        var result = appUpdateManager.CompleteUpdate();
+        yield return result;
+
+        // If the update completes successfully, then the app restarts and this line
+        // is never reached. If this line is reached, then handle the failure (e.g. by
+        // logging result.Error or by displaying a message to the user).
+    }
 }

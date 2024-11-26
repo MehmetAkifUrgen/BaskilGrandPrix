@@ -34,9 +34,9 @@ PluginImporter:
     Editor:
       enabled: 1
       settings:
-        CPU: ARM64
+        CPU: AnyCPU
         DefaultValueInitialized: true
-        OS: OSX
+        OS: AnyOS
     Linux64:
       enabled: 0
       settings:

@@ -6,13 +6,17 @@ using Photon.Pun;
 
 public class Driver : MonoBehaviour
 {
-    public float maxSpeed = 60f;          // Maksimum hız
-    public float acceleration = 30f;      // Formula 1 tarzı hızlanma
-    public float deceleration = 10f;      // Normal yavaşlama
-    public float gravelDeceleration = 20f; // Çakıl üzerindeki yavaşlama
-    public float steerSpeed = 5f;         // Direksiyon açısı
-    private float currentSpeed = 0f;      // Mevcut hız
-    private bool hasCollided = false;     // Çarpma kontrolü
+    public float maxSpeed = 60f;             // Normal yoldaki maksimum hız
+    public float gravelMaxSpeed = 30f;       // Çakıldaki maksimum hız (daha düşük)
+    public float acceleration = 30f;         // Normal hızlanma
+    public float gravelAcceleration = 15f;   // Çakıldaki hızlanma (daha düşük)
+    public float deceleration = 10f;         // Normal yavaşlama
+    public float gravelDeceleration = 20f;   // Çakıldaki yavaşlama (daha yüksek)
+    public float steerSpeed = 5f;            // Direksiyon açısı
+
+    private float currentSpeed = 0f;         // Mevcut hız
+    private bool hasCollided = false;        // Çarpma kontrolü
+    private bool onGravel = false;           // Çakıl kontrolü
 
     private Rigidbody2D rb;
     private InputAction gas;
@@ -48,34 +52,24 @@ public class Driver : MonoBehaviour
 
             if (hasCollided)
             {
-                // Çarpma sonrası hızı sıfırla
-                currentSpeed = 0f;
-                // Gaz verilmeden hareket etme
-                if (input <= 0)
-                {
-                    return;
-                }
-                else
-                {
-                    // Gaz verilirse çarpma durumunu sıfırla
-                    hasCollided = false;
-                }
+                currentSpeed = 0f; // Çarpma sonrası hızı sıfırla
+                if (input <= 0) return; // Gaz verilmeden hareket etme
+                hasCollided = false; // Gaz verilirse çarpma durumunu sıfırla
             }
 
-            // Hızlanma ve yavaşlama
+            // Zemin durumuna göre hızlanma ve maksimum hız limitlerini ayarla
+            float targetMaxSpeed = onGravel ? gravelMaxSpeed : maxSpeed;
+            float currentAcceleration = onGravel ? gravelAcceleration : acceleration;
+            float currentDeceleration = onGravel ? gravelDeceleration : deceleration;
+
+            // Gaz verildiğinde hızlanma
             if (input > 0)
             {
-                // Gaz verildiğinde hızlanma
-                currentSpeed += acceleration * (1 - (currentSpeed / maxSpeed)) * Time.deltaTime;
-
-                // Maksimum hızı aşma
-                if (currentSpeed > maxSpeed)
-                    currentSpeed = maxSpeed;
+                currentSpeed = Mathf.Clamp(currentSpeed + currentAcceleration * Time.deltaTime, 0f, targetMaxSpeed);
             }
             else
             {
                 // Gazdan çekildiğinde yavaşlama
-                float currentDeceleration = deceleration;
                 currentSpeed = Mathf.MoveTowards(currentSpeed, 0f, currentDeceleration * Time.deltaTime);
             }
 
@@ -94,12 +88,11 @@ public class Driver : MonoBehaviour
     {
         if (other.CompareTag("cakil"))
         {
-            // Çakıl alanına girildiğinde yavaşlamayı artır
-            deceleration = gravelDeceleration;
+            onGravel = true; // Çakıl alanına girildiğinde çakıl etkilerini aktif et
         }
-        else if (other.CompareTag("engel")) // Engelle çarpışma olduğunda
+        else if (other.CompareTag("engel"))
         {
-            hasCollided = true; // Çarpma durumunu aktif et
+            hasCollided = true; // Engelle çarpışma olduğunda çarpma durumunu aktif et
             currentSpeed = 0f;  // Hızı sıfırla
         }
     }
@@ -108,8 +101,7 @@ public class Driver : MonoBehaviour
     {
         if (other.CompareTag("cakil"))
         {
-            // Çakıldan çıkınca normal yavaşlamaya dön
-            deceleration = 10f; // Varsayılan yavaşlama değerine geri dön
+            onGravel = false; // Çakıdan çıkınca normal yavaşlamaya dön
         }
     }
 }

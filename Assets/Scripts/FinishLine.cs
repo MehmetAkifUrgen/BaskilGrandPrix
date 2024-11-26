@@ -1,18 +1,22 @@
 using UnityEngine;
-using UnityEngine.UI;
+using Photon.Pun;
 
-public class FinishLine : MonoBehaviour
+public class FinishLine : MonoBehaviourPun
 {
-    public Text finishTimeText;
-    public TimerAndSpeedDisplay timerAndSpeedDisplay;  // TimerAndSpeedDisplay scriptine referans ekleyin
-
     private void OnTriggerEnter2D(Collider2D other)
     {
-        if (other.CompareTag("Car"))  // Arabanın Tag'ını "Player" olarak ayarlayın
+        // Arabalarla çarpışmayı kontrol et
+        if (other.CompareTag("Player")) // Oyuncuların tag'ini "Player" yapın
         {
-            timerAndSpeedDisplay.StopTimer();
-            finishTimeText.gameObject.SetActive(true);
-            finishTimeText.text = "Finish Time: " + timerAndSpeedDisplay.timerText.text;
+            // Oyuncunun PhotonView'ını alın
+            PhotonView playerView = other.GetComponent<PhotonView>();
+
+            // Sadece kendi oyuncumuz için CompleteLap'i çağır
+            if (playerView != null && playerView.IsMine)
+            {
+                int playerID = playerView.Owner.ActorNumber;
+                RaceManager.Instance.CompleteLap(playerID);
+            }
         }
     }
 }

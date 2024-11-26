@@ -10,29 +10,42 @@ public class CreateAndJoinRooms : MonoBehaviourPunCallbacks
 {
     public InputField createInput;
     public InputField joinInput;
+    public Text errorText; // Hata mesajı için Text UI öğesi
 
+    public void CreateRoom()
+    {
+        if (createInput.text.Length < 3)
+        {
+            errorText.text = "Please enter at least 3 characters.";
+            return;
+        }
 
-public void CreateRoom()
-{
-    RoomOptions roomOptions = new RoomOptions();
-    roomOptions.MaxPlayers = 4; // Maksimum 4 oyuncu
+        RoomOptions roomOptions = new RoomOptions();
+        roomOptions.MaxPlayers = 4; // Maksimum 4 oyuncu
 
-    PhotonNetwork.CreateRoom(createInput.text, roomOptions);
-}
+        PhotonNetwork.CreateRoom(createInput.text, roomOptions);
+        errorText.text = ""; // Hata mesajını temizle
+    }
 
+    public void JoinRoom()
+    {
+        if (joinInput.text.Length < 3)
+        {
+            errorText.text = "Please enter at least 3 characters.";
+            return;
+        }
 
-    public void JoinRoom(){
         PhotonNetwork.JoinRoom(joinInput.text);
+        errorText.text = ""; // Hata mesajını temizle
     }
 
     public override void OnJoinedRoom()
     {
-       PhotonNetwork.LoadLevel("SelectCar");
+        PhotonNetwork.LoadLevel("SelectCar");
     }
 
     public void OnBackButtonPressed()
     {
         SceneManager.LoadScene("start"); // Burada önceki sahne adını girin
     }
-
 }

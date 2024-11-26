@@ -105,9 +105,11 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   maxSpeed: 50
-  acceleration: 10
+  gravelMaxSpeed: 15
+  acceleration: 9
+  gravelAcceleration: 5
   deceleration: 20
-  gravelDeceleration: 5
+  gravelDeceleration: 10
   steerSpeed: 5
 --- !u!50 &5356057652711554588
 Rigidbody2D:
